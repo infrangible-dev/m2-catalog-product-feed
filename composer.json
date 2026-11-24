@@ -2,12 +2,12 @@
     "name": "infrangible/m2-catalog-product-feed",
     "description": "Infrangible Magento 2 Catalog Product Feed",
     "type": "magento2-module",
-    "version": "1.0.4",
+    "version": "2.0.0",
     "license": "MIT",
     "keywords": [
         "Magento"
     ],
-    "homepage": "https://github.com/infrangible-dev/m2-catalog-product-feed",
+    "homepage": "https://www.infrangible.dev/modules/catalog-product-feed",
     "authors": [
         {
             "name": "Andreas Knollmann",
@@ -17,12 +17,29 @@
         }
     ],
     "require": {
-        "php": ">=7.1",
-        "magento/framework": "~102.3.5|~103.0.0",
+        "php": ">=8.2",
         "dragonmantank/cron-expression": "~3.4.0",
-        "infrangible/m2-catalog-indexer-flat": "~1.0.0",
-        "infrangible/m2-core": "~2.15.1",
-        "infrangible/m2-task": "~2.4.0"
+        "ext-dom": "*",
+        "fewedev/base": "~2.4.3",
+        "infrangible/m2-backend-widget": "~4.0.5",
+        "infrangible/m2-catalog-indexer-flat": "~2.0.0",
+        "infrangible/m2-core": "~5.0.4",
+        "infrangible/m2-foundation": "~3.0.1",
+        "infrangible/m2-simple-mail": "~2.0.0",
+        "infrangible/m2-task": "~3.0.0",
+        "magento/framework": "~103.0.6",
+        "magento/module-backend": "~102.0.0",
+        "magento/module-catalog": "~104.0.0",
+        "magento/module-catalog-url-rewrite": "~100.4.0",
+        "magento/module-config": "~101.2.0",
+        "magento/module-cron": "~100.4.0",
+        "magento/module-eav": "~102.1.0",
+        "magento/module-store": "~101.1.0",
+        "psr/log": "~2.0.0||~3.0.0",
+        "symfony/console": "~5.4.0||~6.4.0||~7.4.0"
+    },
+    "require-dev": {
+        "infrangible/phpstan-magento": "~1.1.0"
     },
     "autoload": {
         "files": [

@@ -2,109 +2,49 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\CatalogProductFeed\Task;
 
 use Exception;
-use FeWeDev\Base\Arrays;
-use FeWeDev\Base\Files;
-use FeWeDev\Base\Variables;
-use Infrangible\CatalogProductFeed\Helper\ChangeLog;
 use Infrangible\CatalogProductFeed\Helper\Data;
-use Infrangible\CatalogProductFeed\Model\ResourceModel\Attribute\CollectionFactory;
-use Infrangible\Core\Helper\Database;
-use Infrangible\Core\Helper\Export;
-use Infrangible\Core\Helper\Registry;
-use Infrangible\Core\Helper\Stores;
-use Infrangible\SimpleMail\Model\MailFactory;
-use Infrangible\Task\Model\RunFactory;
 use Magento\Catalog\Model\Product;
-use Magento\Framework\App\Filesystem\DirectoryList;
-use Magento\Framework\Event\ManagerInterface;
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Validator\UniversalFactory;
-use Psr\Log\LoggerInterface;
-use Zend_Db_Select_Exception;
 
 /**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ * Exports the products of the change log with the integrations used for the delta export. The exported entries are
+ * removed from the change log after the export (in test mode, they are kept).
  */
 class Delta extends Base
 {
-    /** @var ChangeLog */
-    protected $productFeedChangeLogHelper;
-
-    public function __construct(
-        Files $files,
-        Registry $registryHelper,
-        \Infrangible\Task\Helper\Data $helper,
-        LoggerInterface $logging,
-        DirectoryList $directoryList,
-        RunFactory $runFactory,
-        \Infrangible\Task\Model\ResourceModel\RunFactory $runResourceFactory,
-        MailFactory $mailFactory,
-        Variables $variables,
-        Stores $storeHelper,
-        Database $databaseHelper,
-        Arrays $arrayHelper,
-        Export $catalogExportHelper,
-        Data $productFeedHelper,
-        CollectionFactory $attributeCollectionFactory,
-        \Infrangible\CatalogIndexerFlat\Helper\Data $catalogIndexerFlatHelper,
-        UniversalFactory $universalFactory,
-        ManagerInterface $eventManager,
-        ChangeLog $productFeedChangeLogHelper
-    ) {
-        parent::__construct(
-            $files,
-            $registryHelper,
-            $helper,
-            $logging,
-            $directoryList,
-            $runFactory,
-            $runResourceFactory,
-            $mailFactory,
-            $variables,
-            $storeHelper,
-            $databaseHelper,
-            $arrayHelper,
-            $catalogExportHelper,
-            $productFeedHelper,
-            $attributeCollectionFactory,
-            $catalogIndexerFlatHelper,
-            $universalFactory,
-            $eventManager
-        );
-
-        $this->productFeedChangeLogHelper = $productFeedChangeLogHelper;
-    }
-
     /**
-     * @throws LocalizedException
-     * @throws Zend_Db_Select_Exception
+     * Exports the changed products.
+     *
+     * @return bool
      * @throws Exception
      */
     protected function runTask(): bool
     {
         $this->logging->info('Starting product feed delta export');
 
-        $entityIds = $this->productFeedChangeLogHelper->fetchEntityIds(
-            Product::ENTITY,
-            ! $this->isTest()
-        );
+        $before = gmdate('Y-m-d H:i:s');
 
-        $entityIds = array_unique($entityIds);
+        $entityIds = $this->productFeedChangeLogHelper->fetchEntityIds(Product::ENTITY, false, $before);
 
-        if (count($entityIds)) {
-            $this->setIsEmptyRun(false);
-
+        if (count($entityIds) > 0) {
             $this->reindexProducts(
                 Data::MODE_DELTA,
                 $this->getStoreCode(),
                 $entityIds,
                 $this->getIntegrationNames()
             );
+
+            if (! $this->isTest()) {
+                $this->productFeedChangeLogHelper->removeEntityIds($before, Product::ENTITY);
+            }
         }
 
         $this->logging->info('Finished product feed delta export');

@@ -2,18 +2,46 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\CatalogProductFeed\Model\Attribute\Custom;
 
 use Magento\Framework\Exception\NoSuchEntityException;
 
 /**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ * The URL of the thumbnail of the product.
  */
 class ThumbnailUrl extends AbstractCustom
 {
     /**
+     * Returns the value of the field.
+     *
+     * @param int $storeId
+     * @param array $productData
+     * @param bool $isChild
+     * @param array $categoryPaths
+     * @param array $urlRewrites
+     * @param array $galleryImages
+     * @param array $indexedPrices
+     * @param array $stockItem
+     * @param array $children
+     * @param array $bundled
+     * @param array $grouped
+     * @phpstan-param array<string, mixed> $productData
+     * @phpstan-param array<int|string, array<string, mixed>> $categoryPaths
+     * @phpstan-param array<int|string, mixed> $urlRewrites
+     * @phpstan-param array<int|string, mixed> $galleryImages
+     * @phpstan-param array<string, mixed> $indexedPrices
+     * @phpstan-param array<string, mixed> $stockItem
+     * @phpstan-param array<int|string, array<string, mixed>> $children
+     * @phpstan-param array<int|string, array<string, mixed>> $bundled
+     * @phpstan-param array<int|string, array<string, mixed>> $grouped
+     *
+     * @return string|null
      * @throws NoSuchEntityException
      */
     public function process(
@@ -29,19 +57,12 @@ class ThumbnailUrl extends AbstractCustom
         array $bundled,
         array $grouped
     ): ?string {
-        return array_key_exists(
-            'thumbnail',
-            $productData
-        ) ? $this->customHelper->getImageUrl(
-            $storeId,
-            $this->arrays->getValue(
-                $productData,
-                'thumbnail'
-            )
-        ) : null;
+        return $this->customHelper->getImageUrl($storeId, $productData[ 'thumbnail' ] ?? null);
     }
 
     /**
+     * Returns the codes of the product attributes the field needs.
+     *
      * @return string[]
      */
     public function requireEavAttributeCodes(): array

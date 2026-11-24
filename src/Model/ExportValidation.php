@@ -2,42 +2,55 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\CatalogProductFeed\Model;
 
 use Magento\Framework\DataObject;
 
 /**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ * The data of a product before its export, passed to the observers of the event
+ * infrangible_catalogproductfeed_export_validation. An observer skips the product with setResult(false).
  *
  * @method string getMode()
- * @method void setMode(string $mode)
+ * @method $this setMode(string $mode)
  * @method int getStoreId()
- * @method void setStoreId(int $storeId)
- * @method array getProductData()
- * @method void setProductData(array $productData)
+ * @method $this setStoreId(int $storeId)
+ * @method array<string, mixed> getProductData()
+ * @method $this setProductData(array $productData)
  * @method array getCategoryPaths()
- * @method void setCategoryPaths(array $categoryPaths)
- * @method array getUrlRewrites()
- * @method void setUrlRewrites(array $urlRewrites)
- * @method array getGalleryImages()
- * @method void setGalleryImages(array $galleryImages)
- * @method array getIndexedPrices()
- * @method void setIndexedPrices(array $indexedPrices)
- * @method array getStockItem()
- * @method void setStockItem(array $stockItem)
- * @method array getReviewSummary()
- * @method void setReviewSummary(array $reviewSummary)
+ * @method $this setCategoryPaths(array $categoryPaths)
+ * @method array<int|string, mixed> getUrlRewrites()
+ * @method $this setUrlRewrites(array $urlRewrites)
+ * @method array<int|string, mixed> getGalleryImages()
+ * @method $this setGalleryImages(array $galleryImages)
+ * @method array<string, mixed> getIndexedPrices()
+ * @method $this setIndexedPrices(array $indexedPrices)
+ * @method array<string, mixed> getStockItem()
+ * @method $this setStockItem(array $stockItem)
+ * @method array<string, mixed> getReviewSummary()
+ * @method $this setReviewSummary(array $reviewSummary)
  * @method array getChildren()
- * @method void setChildren(array $children)
+ * @method $this setChildren(array $children)
  * @method array getBundled()
- * @method void setBundled(array $bundled)
+ * @method $this setBundled(array $bundled)
  * @method array getGrouped()
- * @method void setGrouped(array $grouped)
- * @method bool getResult()
- * @method void setResult(bool $result)
+ * @method $this setGrouped(array $grouped)
+ * @method $this setResult(bool $result)
  */
 class ExportValidation extends DataObject
 {
+    /**
+     * Returns whether the product is exported, also if an observer set the result with setData().
+     *
+     * @return bool
+     */
+    public function getResult(): bool
+    {
+        return (bool)$this->getData('result');
+    }
 }

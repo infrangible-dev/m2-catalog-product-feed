@@ -2,69 +2,79 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\CatalogProductFeed\Model\Config\Custom;
 
 use DOMDocument;
-use DOMNode;
+use DOMElement;
+use DOMXPath;
 use Magento\Framework\Config\ConverterInterface;
 
 /**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ * Converts the merged etc/catalog_product_feed_attribute.xml into name => label and model of the custom fields.
  */
 class Converter implements ConverterInterface
 {
     /**
+     * Returns the custom fields with name, label and model.
+     *
      * @param DOMDocument $source
+     *
+     * @return array
+     * @phpstan-return array<string, array{label: string, model: string}>
      */
     public function convert($source): array
     {
         $result = [];
 
-        /** @var DOMNode $childNode */
-        foreach ($source->childNodes as $childNode) {
-            if ($childNode->nodeName === 'config') {
-                /** @var DOMNode $childChildNode */
-                foreach ($childNode->childNodes as $childChildNode) {
-                    if ($childChildNode->nodeName === 'custom_fields') {
-                        /** @var DOMNode $childChildChildNode */
-                        foreach ($childChildNode->childNodes as $childChildChildNode) {
-                            $name = null;
-                            $label = null;
-                            $model = null;
+        $xpath = new DOMXPath($source);
 
-                            if ($childChildChildNode->nodeName === 'custom_field') {
-                                $attributes = $childChildChildNode->attributes;
+        $customFields = $xpath->query('/config/custom_fields/custom_field');
 
-                                if ($attributes) {
-                                    $nameNode = $attributes->getNamedItem('name');
+        if ($customFields === false) {
+            return $result;
+        }
 
-                                    if ($nameNode) {
-                                        $name = (string)$nameNode->nodeValue;
-                                    }
+        foreach ($customFields as $customField) {
+            if (! $customField instanceof DOMElement) {
+                continue;
+            }
 
-                                    /** @var DOMNode $childChildChildChildNode */
-                                    foreach ($childChildChildNode->childNodes as $childChildChildChildNode) {
-                                        if ($childChildChildChildNode->nodeName === 'label') {
-                                            $label = (string)$childChildChildChildNode->nodeValue;
-                                        }
-                                        if ($childChildChildChildNode->nodeName === 'model') {
-                                            $model = (string)$childChildChildChildNode->nodeValue;
-                                        }
-                                    }
-                                }
-                            }
+            $name = trim($customField->getAttribute('name'));
+            $label = $this->getChildValue($customField, 'label');
+            $model = $this->getChildValue($customField, 'model');
 
-                            if (! empty($name) && ! empty($label) && ! empty($model)) {
-                                $result[ $name ] = ['label' => $label, 'model' => $model];
-                            }
-                        }
-                    }
-                }
+            if ($name !== '' && $label !== '' && $model !== '') {
+                $result[ $name ] = ['label' => $label, 'model' => $model];
             }
         }
 
         return $result;
+    }
+
+    /**
+     * Returns the text of the last child element with the name, or an empty string.
+     *
+     * @param DOMElement $element
+     * @param string $name
+     *
+     * @return string
+     */
+    private function getChildValue(DOMElement $element, string $name): string
+    {
+        $value = '';
+
+        foreach ($element->childNodes as $childNode) {
+            if ($childNode instanceof DOMElement && $childNode->nodeName === $name) {
+                $value = trim($childNode->textContent);
+            }
+        }
+
+        return $value;
     }
 }

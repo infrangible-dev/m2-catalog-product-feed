@@ -2,15 +2,46 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\CatalogProductFeed\Model\Attribute\Custom;
 
 /**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ * The names of the categories of the product, by category ID.
  */
 class CategoryNames extends AbstractCustom
 {
+    /**
+     * Returns the value of the field.
+     *
+     * @param int $storeId
+     * @param array $productData
+     * @param bool $isChild
+     * @param array $categoryPaths
+     * @param array $urlRewrites
+     * @param array $galleryImages
+     * @param array $indexedPrices
+     * @param array $stockItem
+     * @param array $children
+     * @param array $bundled
+     * @param array $grouped
+     * @phpstan-param array<string, mixed> $productData
+     * @phpstan-param array<int|string, array<string, mixed>> $categoryPaths
+     * @phpstan-param array<int|string, mixed> $urlRewrites
+     * @phpstan-param array<int|string, mixed> $galleryImages
+     * @phpstan-param array<string, mixed> $indexedPrices
+     * @phpstan-param array<string, mixed> $stockItem
+     * @phpstan-param array<int|string, array<string, mixed>> $children
+     * @phpstan-param array<int|string, array<string, mixed>> $bundled
+     * @phpstan-param array<int|string, array<string, mixed>> $grouped
+     *
+     * @return array
+     * @phpstan-return array<int|string, string>
+     */
     public function process(
         int $storeId,
         array $productData,
@@ -24,19 +55,15 @@ class CategoryNames extends AbstractCustom
         array $bundled,
         array $grouped
     ): array {
-        $result = [];
-
-        foreach ($categoryPaths as $categoryId => $categoryData) {
-            $result[ $categoryId ] = $this->arrays->getValue(
-                $categoryData,
-                'name'
-            );
-        }
-
-        return $result;
+        return array_map(
+            fn(array $categoryData): string => $this->variables->stringValueOrDefault($categoryData[ 'name' ] ?? null),
+            $categoryPaths
+        );
     }
 
     /**
+     * Returns the codes of the product attributes the field needs.
+     *
      * @return string[]
      */
     public function requireEavAttributeCodes(): array

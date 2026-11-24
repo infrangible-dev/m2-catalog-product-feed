@@ -2,43 +2,48 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\CatalogProductFeed\Model\Config\Source\Attribute;
 
 use Magento\Framework\Data\OptionSourceInterface;
 
 /**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ * The custom fields as options of the attribute form and grid.
  */
 class Custom implements OptionSourceInterface
 {
-    /** @var \Infrangible\CatalogProductFeed\Helper\Custom */
-    protected $productFeedCustomHelper;
-
-    public function __construct(\Infrangible\CatalogProductFeed\Helper\Custom $productFeedCustomHelper)
+    /**
+     * @param \Infrangible\CatalogProductFeed\Helper\Custom $productFeedCustomHelper
+     */
+    public function __construct(protected \Infrangible\CatalogProductFeed\Helper\Custom $productFeedCustomHelper)
     {
-        $this->productFeedCustomHelper = $productFeedCustomHelper;
     }
 
+    /**
+     * Returns the custom fields as name => label.
+     *
+     * @return array
+     * @phpstan-return array<string, string>
+     */
     public function toOptions(): array
     {
-        $options = [];
-
-        $customFields = $this->productFeedCustomHelper->getCustomFieldData();
-
-        foreach ($customFields as $value => $data) {
-            if (is_array($data) && array_key_exists(
-                    'label',
-                    $data
-                )) {
-                $options[ $value ] = $data[ 'label' ];
-            }
-        }
-
-        return $options;
+        return array_map(
+            static fn(array $data): string => $data[ 'label' ],
+            $this->productFeedCustomHelper->getCustomFieldData()
+        );
     }
 
+    /**
+     * Returns the custom fields as options, with an empty option first.
+     *
+     * @return array
+     * @phpstan-return array<int, array{value: string, label: mixed}>
+     */
     public function toOptionArray(): array
     {
         $options = [['value' => '', 'label' => __('--Please Select--')]];

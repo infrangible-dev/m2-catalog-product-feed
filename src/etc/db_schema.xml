@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+
+<!--
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="catalog_product_feed_attribute" resource="default" engine="innodb" comment="Catalog Product Feed Attribute">
+        <column xsi:type="int" name="attribute_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Primary identifier of attribute"/>
+        <column xsi:type="int" name="eav_attribute_id" padding="10" unsigned="true" nullable="true" identity="false" comment="EAV attribute id"/>
+        <column xsi:type="varchar" name="custom_field" nullable="true" length="255" comment="Custom field"/>
+        <column xsi:type="varchar" name="fixed_value" nullable="true" length="255" comment="Fixed value"/>
+        <column xsi:type="varchar" name="value_format" nullable="true" length="255" comment="Value format"/>
+        <column xsi:type="smallint" name="position" padding="6" unsigned="false" nullable="true" identity="false" default="0" comment="Position in feed"/>
+        <column xsi:type="varchar" name="attribute_code" nullable="true" length="255" comment="Target attribute code"/>
+        <column xsi:type="smallint" name="is_product" padding="5" unsigned="true" nullable="false" identity="false" default="0" comment="Product flag"/>
+        <column xsi:type="smallint" name="is_variant" padding="5" unsigned="true" nullable="false" identity="false" default="0" comment="Variant flag"/>
+        <column xsi:type="smallint" name="use_for_delta" padding="5" unsigned="true" nullable="false" identity="false" default="0" comment="Delta flag"/>
+        <column xsi:type="smallint" name="character_data" padding="5" unsigned="true" nullable="true" identity="false" default="0" comment="Character data"/>
+        <column xsi:type="smallint" name="strip_tags" padding="5" unsigned="true" nullable="true" identity="false" default="0" comment="Strip tags"/>
+        <column xsi:type="varchar" name="integration" nullable="false" length="255" comment="Integration"/>
+        <column xsi:type="datetime" name="created_at" on_update="false" nullable="false" comment="Creation date"/>
+        <column xsi:type="datetime" name="updated_at" on_update="false" nullable="false" comment="Update date"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="attribute_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="CATALOG_PRODUCT_FEED_ATTRIBUTE_ATTRIBUTE_CODE_INTEGRATION">
+            <column name="attribute_code"/>
+            <column name="integration"/>
+        </constraint>
+    </table>
+    <table name="catalog_product_feed_indexer_change_log" resource="default" engine="innodb" comment="Catalog Product Feed Change Log">
+        <column xsi:type="int" name="change_log_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Primary identifier of change log"/>
+        <column xsi:type="smallint" name="entity_type_id" padding="6" unsigned="false" nullable="false" identity="false" comment="Magento entity type id"/>
+        <column xsi:type="int" name="entity_id" padding="10" unsigned="true" nullable="false" identity="false" comment="Magento entity id"/>
+        <column xsi:type="datetime" name="created_at" on_update="false" nullable="false" comment="Creation date"/>
+        <column xsi:type="datetime" name="updated_at" on_update="false" nullable="false" comment="Update date"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="change_log_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="CATALOG_PRODUCT_FEED_INDEXER_CHANGE_LOG_ENTITY_TYPE_ID_ENTITY_ID">
+            <column name="entity_type_id"/>
+            <column name="entity_id"/>
+        </constraint>
+        <index referenceId="CATALOG_PRODUCT_FEED_INDEXER_CHANGE_LOG_ENTITY_TYPE_ID" indexType="btree">
+            <column name="entity_type_id"/>
+        </index>
+    </table>
+</schema>

@@ -2,43 +2,51 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\CatalogProductFeed\Model\Indexer;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Model\AbstractModel;
 
 /**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
- *
- * @method string getChangelogId()
- * @method void setChangelogId(string $changelogId)
- * @method string getEntityTypeId()
- * @method void setEntityTypeId(string $entityTypeId)
- * @method string getEntityId()
- * @method void setEntityId(string $entityId)
- * @method string getCreatedAt()
- * @method void setCreatedAt(string $createdAt)
- * @method string getUpdatedAt()
- * @method void setUpdatedAt(string $updatedAt)
+ * An entry of the change log: an entity whose data changed since the last delta export.
  */
 class Changelog extends AbstractModel
 {
+    /** @var string */
     protected $_eventPrefix = 'infrangible_catalogproductfeed_indexer_changelog';
 
+    /**
+     * Sets the resource model.
+     *
+     * @return void
+     * @throws LocalizedException
+     */
     protected function _construct(): void
     {
         $this->_init(\Infrangible\CatalogProductFeed\Model\ResourceModel\Indexer\Changelog::class);
     }
 
-    public function beforeSave(): Changelog
+    /**
+     * Sets the creation and update time.
+     *
+     * @return $this
+     */
+    public function beforeSave(): static
     {
         if ($this->isObjectNew()) {
-            $this->setCreatedAt(gmdate('Y-m-d H:i:s'));
+            $this->setData('created_at', gmdate('Y-m-d H:i:s'));
         }
 
-        $this->setUpdatedAt(gmdate('Y-m-d H:i:s'));
+        $this->setData('updated_at', gmdate('Y-m-d H:i:s'));
 
-        return parent::beforeSave();
+        parent::beforeSave();
+
+        return $this;
     }
 }

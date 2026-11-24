@@ -1,0 +1,41 @@
+{
+    "catalog_product_feed_attribute": {
+        "column": {
+            "attribute_id": true,
+            "eav_attribute_id": true,
+            "custom_field": true,
+            "fixed_value": true,
+            "value_format": true,
+            "position": true,
+            "attribute_code": true,
+            "is_product": true,
+            "is_variant": true,
+            "use_for_delta": true,
+            "character_data": true,
+            "strip_tags": true,
+            "integration": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "CATALOG_PRODUCT_FEED_ATTRIBUTE_ATTRIBUTE_CODE_INTEGRATION": true
+        }
+    },
+    "catalog_product_feed_indexer_change_log": {
+        "column": {
+            "change_log_id": true,
+            "entity_type_id": true,
+            "entity_id": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "CATALOG_PRODUCT_FEED_INDEXER_CHANGE_LOG_ENTITY_TYPE_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "CATALOG_PRODUCT_FEED_INDEXER_CHANGE_LOG_ENTITY_TYPE_ID_ENTITY_ID": true
+        }
+    }
+}

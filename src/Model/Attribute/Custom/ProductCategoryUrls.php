@@ -2,21 +2,48 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\CatalogProductFeed\Model\Attribute\Custom;
 
 use Magento\Framework\Exception\NoSuchEntityException;
 
 /**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ * The URLs of the product in the store, by category ID: the URL without category under the ID of the root
+ * category of the store.
  */
 class ProductCategoryUrls extends AbstractCustom
 {
-    /** @var string */
-    protected $productCategoryRewritesSelect;
-
     /**
+     * Returns the value of the field.
+     *
+     * @param int $storeId
+     * @param array $productData
+     * @param bool $isChild
+     * @param array $categoryPaths
+     * @param array $urlRewrites
+     * @param array $galleryImages
+     * @param array $indexedPrices
+     * @param array $stockItem
+     * @param array $children
+     * @param array $bundled
+     * @param array $grouped
+     * @phpstan-param array<string, mixed> $productData
+     * @phpstan-param array<int|string, array<string, mixed>> $categoryPaths
+     * @phpstan-param array<int|string, mixed> $urlRewrites
+     * @phpstan-param array<int|string, mixed> $galleryImages
+     * @phpstan-param array<string, mixed> $indexedPrices
+     * @phpstan-param array<string, mixed> $stockItem
+     * @phpstan-param array<int|string, array<string, mixed>> $children
+     * @phpstan-param array<int|string, array<string, mixed>> $bundled
+     * @phpstan-param array<int|string, array<string, mixed>> $grouped
+     *
+     * @return array
+     * @phpstan-return array<int|string, string>
      * @throws NoSuchEntityException
      */
     public function process(
@@ -34,35 +61,24 @@ class ProductCategoryUrls extends AbstractCustom
     ): array {
         $result = [];
 
-        foreach ($urlRewrites as $idPath => $url) {
-            if (preg_match(
-                '#product/[0-9]+/([0-9]+)#',
-                $idPath,
-                $matches
-            )) {
-                if (array_key_exists(
-                    1,
-                    $matches
-                )) {
-                    $result[ $matches[ 1 ] ] = $this->urlHelper->getUrl(
-                        '',
-                        null,
-                        ['_direct' => $url]
-                    );
-                }
-            } else {
-                $result[ $this->storeHelper->getStore($storeId)->getRootCategoryId() ] = $this->urlHelper->getUrl(
-                    '',
-                    null,
-                    ['_direct' => $url]
-                );
+        foreach ($urlRewrites as $categoryId => $url) {
+            if (! is_string($url) || $url === '') {
+                continue;
             }
+
+            if ((int)$categoryId === 0) {
+                $categoryId = $this->variables->intValue($this->storeHelper->getStore($storeId)->getRootCategoryId());
+            }
+
+            $result[ $categoryId ] = $this->getDirectUrl($url, $storeId);
         }
 
         return $result;
     }
 
     /**
+     * Returns the codes of the product attributes the field needs.
+     *
      * @return string[]
      */
     public function requireEavAttributeCodes(): array

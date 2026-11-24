@@ -2,64 +2,82 @@
 
 declare(strict_types=1);
 
+/**
+ * @author      Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
+ * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
 namespace Infrangible\CatalogProductFeed\Plugin\Catalog\Model;
 
 use Exception;
-use FeWeDev\Base\Variables;
 use Infrangible\CatalogProductFeed\Helper\ChangeLog;
 
 /**
- * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
- * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ * Adds saved products to the change log of the delta export, if their exported data changed.
  */
 class Product
 {
-    /** @var ChangeLog */
-    protected $changeLogHelper;
-
-    /** @var Variables */
-    protected $variables;
-
-    public function __construct(ChangeLog $changeLogHelper, Variables $variables)
+    /**
+     * @param ChangeLog $changeLogHelper
+     */
+    public function __construct(protected ChangeLog $changeLogHelper)
     {
-        $this->changeLogHelper = $changeLogHelper;
-        $this->variables = $variables;
     }
 
     /**
+     * Adds the product and its parents to the change log if its price changed.
+     *
+     * @param \Magento\Catalog\Model\Product $subject
+     * @param mixed $result
+     *
+     * @return mixed
      * @throws Exception
      */
-    public function afterPriceReindexCallback(\Magento\Catalog\Model\Product $product): void
+    public function afterPriceReindexCallback(\Magento\Catalog\Model\Product $subject, mixed $result): mixed
     {
-        if ($this->changeLogHelper->isPriceUpdateRequired($product)) {
-            $productIds = $this->changeLogHelper->collectProductIds($this->variables->intValue($product->getId()));
-
-            $this->changeLogHelper->insertEntityIds(
-                $productIds,
-                \Magento\Catalog\Model\Product::ENTITY
-            );
+        if ($this->changeLogHelper->isPriceUpdateRequired($subject)) {
+            $this->addProduct($subject);
         }
+
+        return $result;
     }
 
     /**
+     * Adds the product and its parents to the change log if an exported attribute or the stock status changed.
+     *
+     * Price changes are added by afterPriceReindexCallback().
+     *
+     * @param \Magento\Catalog\Model\Product $subject
+     * @param mixed $result
+     *
+     * @return mixed
      * @throws Exception
      */
-    public function afterReindex(\Magento\Catalog\Model\Product $product): void
+    public function afterReindex(\Magento\Catalog\Model\Product $subject, mixed $result): mixed
     {
-        if ($this->changeLogHelper->isPriceUpdateRequired($product)) {
-            return;
+        if (! $this->changeLogHelper->isPriceUpdateRequired($subject) &&
+            ($this->changeLogHelper->isStockUpdateRequired($subject) ||
+                $this->changeLogHelper->isAttributeUpdateRequired($subject))) {
+            $this->addProduct($subject);
         }
 
-        if ($this->changeLogHelper->isAttributeUpdateRequired($product) ||
-            $this->changeLogHelper->isStockUpdateRequired($product)) {
+        return $result;
+    }
 
-            $productIds = $this->changeLogHelper->collectProductIds($this->variables->intValue($product->getId()));
-
-            $this->changeLogHelper->insertEntityIds(
-                $productIds,
-                \Magento\Catalog\Model\Product::ENTITY
-            );
-        }
+    /**
+     * Adds the product and its parents to the change log.
+     *
+     * @param \Magento\Catalog\Model\Product $product
+     *
+     * @return void
+     * @throws Exception
+     */
+    private function addProduct(\Magento\Catalog\Model\Product $product): void
+    {
+        $this->changeLogHelper->insertEntityIds(
+            $this->changeLogHelper->collectProductIds($product),
+            \Magento\Catalog\Model\Product::ENTITY
+        );
     }
 }

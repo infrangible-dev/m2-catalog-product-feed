@@ -2,51 +2,53 @@
 
 declare(strict_types=1);
 
-namespace Infrangible\CatalogProductFeed\Console\Command;
-
-use Infrangible\Task\Console\Command\Task;
-use Symfony\Component\Console\Input\InputOption;
-
 /**
  * @author      Andreas Knollmann
- * @copyright   2014-2024 Softwareentwicklung Andreas Knollmann
+ * @copyright   Copyright (c) 2014-2026 Softwareentwicklung Andreas Knollmann
  * @license     http://www.opensource.org/licenses/mit-license.php MIT
+ */
+
+namespace Infrangible\CatalogProductFeed\Console\Command;
+
+use Infrangible\CatalogProductFeed\Traits\Command;
+use Infrangible\CatalogProductFeed\Traits\DeltaTask;
+use Infrangible\Task\Console\Command\Task;
+
+/**
+ * The command task:catalog_product_feed_delta.
  */
 class Delta extends Task
 {
-    protected function getTaskName(): string
-    {
-        return 'catalog_product_feed_delta';
-    }
+    use DeltaTask;
+    use Command;
 
+    /**
+     * Returns the class of the script that runs the task.
+     *
+     * @return string
+     */
     protected function getClassName(): string
     {
         return Script\Delta::class;
     }
 
+    /**
+     * Returns the description of the command.
+     *
+     * @return string
+     */
     protected function getCommandDescription(): string
     {
         return 'Process all product feed changes';
     }
 
-    protected function getCommandDefinition(): array
+    /**
+     * Returns whether the command has the option --force.
+     *
+     * @return bool
+     */
+    protected function hasForceOption(): bool
     {
-        $commandDefinition = parent::getCommandDefinition();
-
-        $commandDefinition[] = new InputOption(
-            'integration',
-            null,
-            InputOption::VALUE_OPTIONAL,
-            'Name of integrations to create feed'
-        );
-
-        $commandDefinition[] = new InputOption(
-            'force',
-            'f',
-            InputOption::VALUE_NONE,
-            'Ignore schedules'
-        );
-
-        return $commandDefinition;
+        return false;
     }
 }
